@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the System</title>
+</head>
+<body>
+<!-- Kullanıcının giriş yapıp yapmadığını kontrol et -->
+{% if user.is_authenticated %}
+<!-- Eğer kullanıcı giriş yapmışsa, dashboard'a yönlendir -->
+<script>
+            window.location.href = "{% url 'dashboard' %}";  <!-- Dashboard URL'si -->
+
+</script>
+{% else %}
+<!-- Kullanıcı giriş yapmamışsa, login seçeneklerini göster -->
+<h1>Welcome to the System</h1>
+<p>Please log in to access your account:</p>
+
+<!-- Personel Login Butonu -->
+<button onclick="window.location.href='/login/staff'">
+    Staff Login
+</button>
+
+<!-- Yönetici Login Butonu -->
+<button onclick="window.location.href='/login/manager'">
+    Manager Login
+</button>
+
+{% endif %}
+</body>
+</html>

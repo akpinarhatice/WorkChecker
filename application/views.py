@@ -10,6 +10,14 @@ from rest_framework.views import APIView
 from application.forms import LoginForm
 from application.serializers import LoginSerializer
 
+class IndexView(TemplateView):
+    template_name = 'index.html'
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('application:dashboard')
+        return super().get(request, *args, **kwargs)
+
 
 class DashboardView(TemplateView):
     template_name = 'dashboard.html'
