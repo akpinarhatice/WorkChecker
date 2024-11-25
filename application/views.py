@@ -1,15 +1,18 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 
 # Create your views here.
 
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django.contrib.auth import login, logout
 from django.utils import timezone
 from rest_framework.views import APIView
 
-from application.forms import LoginForm, LeaveRequestForm
-from application.models import WorkLog
+from application.forms import LoginForm, StaffLeaveRequestForm, \
+    ManagerLeaveRequestForm
+from application.models import WorkLog, Leave
 from application.serializers import LoginSerializer
+
 
 class IndexView(TemplateView):
     template_name = 'index.html'
@@ -71,13 +74,35 @@ class LogoutView(APIView):
 class LeaveRequestView(APIView):
 
     def get(self, request, *args, **kwargs):
-        template_name = 'leave_request.html'
-        form = LeaveRequestForm(request=request)
+        if not request.user.is_authenticated:
+            return redirect('application:index')
+        elif request.user.is_manager:
+            template_name = 'manager_leave_request.html'
+            form = ManagerLeaveRequestForm(request=request)
+        else:
+            form = StaffLeaveRequestForm(request=request)
+            template_name = 'staff_leave_request.html'
 
         return render(request, template_name, context={'form': form})
+
     def post(self, request, *args, **kwargs):
-        form = LeaveRequestForm(request.POST, request=request)
+        if not request.user.is_authenticated:
+            return redirect('application:index')
+        elif request.user.is_manager:
+            form = ManagerLeaveRequestForm(request.POST, request=request)
+        else:
+            form = StaffLeaveRequestForm(request.POST, request=request)
+
         if form.is_valid():
             form.save()
         print(form.errors)
         return redirect('application:dashboard')
+
+
+class LeaveRequestAPIView(LoginRequiredMixin, ListView):
+    model = Leave
+    template_name = 'staff_leaves.html'
+    context_object_name = 'leave_requests'
+
+    def get_queryset(self):
+        return Leave.objects.filter(employee=self.request.user).order_by('created_at')

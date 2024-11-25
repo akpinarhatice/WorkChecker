@@ -7,25 +7,10 @@ class LoginForm(forms.Form):
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
 
 
-class LeaveRequestForm(forms.ModelForm):
+class BaseLeaveRequestForm(forms.ModelForm):
     class Meta:
         model = Leave
         fields = ['start_date', 'end_date', 'description', 'substitute', 'employee']
-
-
-
-    def __init__(self, *args, **kwargs):
-        request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
-
-        self.fields['substitute'].empty_label = "Substitute employee"
-        self.fields['substitute'].queryset = Employee.objects.filter(
-            role='staff').exclude(id=request.user.id)
-
-        self.fields['start_date'].widget.attrs.update({'class': 'datepicker'})
-        self.fields['end_date'].widget.attrs.update({'class': 'datepicker'})
-        self.fields['employee'].widget = forms.HiddenInput()
-        self.fields['employee'].initial = request.user.id
 
     def clean(self):
         cleaned_data = super().clean()
@@ -37,3 +22,41 @@ class LeaveRequestForm(forms.ModelForm):
                 "Başlangıç tarihi, bitiş tarihinden büyük olamaz.")
 
         return cleaned_data
+
+
+class StaffLeaveRequestForm(BaseLeaveRequestForm):
+    class Meta(BaseLeaveRequestForm.Meta):
+        fields = ['start_date', 'end_date', 'description', 'substitute', 'employee']
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+        self.fields['substitute'].empty_label = "Substitute employee"
+        self.fields['substitute'].queryset = Employee.objects.filter(
+            role='staff').exclude(id=self.request.user.id)
+
+        self.fields['start_date'].widget.attrs.update({'class': 'datepicker'})
+        self.fields['end_date'].widget.attrs.update({'class': 'datepicker'})
+        self.fields['employee'].widget = forms.HiddenInput()
+        self.fields['employee'].initial = self.request.user.id
+
+
+class ManagerLeaveRequestForm(BaseLeaveRequestForm):
+    class Meta(BaseLeaveRequestForm.Meta):
+        fields = ['start_date', 'end_date', 'substitute', 'employee', 'status']
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+        self.fields['substitute'].empty_label = "Substitute employee"
+        self.fields['substitute'].queryset = Employee.objects.filter(
+            role='staff')
+
+        self.fields['start_date'].widget.attrs.update({'class': 'datepicker'})
+        self.fields['end_date'].widget.attrs.update({'class': 'datepicker'})
+        self.fields['employee'].queryset = Employee.objects.filter(
+            role='staff').exclude(id=self.request.user.id)
+        self.fields['status'].widget = forms.HiddenInput()
+        self.fields['status'].initial = 'approved'
