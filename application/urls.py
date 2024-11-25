@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import LoginView, LogoutView, DashboardView, IndexView
+from .views import LoginView, LogoutView, DashboardView, IndexView, LeaveRequestView
 
 app_name = "application"
 
@@ -8,4 +8,5 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('', IndexView.as_view(), name='index'),
+    path('leave-request/', LeaveRequestView.as_view(), name='leave_request'),
 ]

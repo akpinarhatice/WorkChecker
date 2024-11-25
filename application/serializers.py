@@ -1,7 +1,8 @@
-from .models import Employee
+from .models import Employee, WorkLog, Leave
 from django.contrib.auth import authenticate
-from rest_framework import serializers
 from django.core.exceptions import ValidationError
+from rest_framework import serializers
+from datetime import datetime, time
 
 
 class LoginSerializer(serializers.Serializer):
@@ -26,3 +27,50 @@ class LoginSerializer(serializers.Serializer):
             raise ValidationError("User account is not active")
 
         return {'user': user}
+
+
+class WorkLogSerializer(serializers.ModelSerializer):
+    employee_username = serializers.CharField(source='employee.username', read_only=True)  # Çalışanın kullanıcı adı
+    late_minutes = serializers.SerializerMethodField()  # Geç kalma süresini hesaplamak için
+
+    class Meta:
+        model = WorkLog
+        fields = [
+            'id',
+            'employee',
+            'employee_username',
+            'check_in',
+            'check_out',
+            'date',
+            'late_minutes',  # late period
+        ]
+        read_only_fields = ['employee_username', 'late_minutes']  # only readable late minutes and employee username
+
+    def get_late_minutes(self, obj):
+        if obj.check_in:
+            # work start time is 08:00
+            work_start_time = datetime.combine(obj.date, time(8, 0))
+            if obj.check_in > work_start_time:
+                late_duration = obj.check_in - work_start_time
+                return late_duration.seconds // 60  # changed to minutes
+        return 0  # if is not late, return 0
+
+
+class LeaveRequestSerializer(serializers.ModelSerializer):
+    employee_username = serializers.CharField(source='employee.username', read_only=True)  # worker's username
+    substitute_username = serializers.CharField(source='substitute.username', read_only=True)  # substitute's username
+
+    class Meta:
+        model = Leave
+        fields = [
+            'id',
+            'employee',
+            'employee_username',
+            'start_date',
+            'end_date',
+            'created_at',
+            'status',
+            'description',
+            'substitute_username',
+        ]
+        read_only_fields = ['employee_username', 'substitute_username']  # only readable employee and substitute username

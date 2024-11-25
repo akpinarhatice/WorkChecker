@@ -4,10 +4,11 @@ from django.shortcuts import render, redirect
 
 from django.views.generic import TemplateView
 from django.contrib.auth import login, logout
-from django.http import JsonResponse
+from django.utils import timezone
 from rest_framework.views import APIView
 
-from application.forms import LoginForm
+from application.forms import LoginForm, LeaveRequestForm
+from application.models import WorkLog
 from application.serializers import LoginSerializer
 
 class IndexView(TemplateView):
@@ -65,3 +66,18 @@ class LogoutView(APIView):
     def get(self, request):
         logout(request)  # log out user
         return redirect('application:login', user_type='staff')
+
+
+class LeaveRequestView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        template_name = 'leave_request.html'
+        form = LeaveRequestForm(request=request)
+
+        return render(request, template_name, context={'form': form})
+    def post(self, request, *args, **kwargs):
+        form = LeaveRequestForm(request.POST, request=request)
+        if form.is_valid():
+            form.save()
+        print(form.errors)
+        return redirect('application:dashboard')
