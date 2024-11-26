@@ -40,7 +40,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     'application',
+    'drf_yasg'
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -109,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-    ],
+    ]
 }
 
 # Internationalization

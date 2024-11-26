@@ -110,7 +110,7 @@ class LeaveRequestView(APIView):
         return redirect('application:dashboard')
 
 
-class LeaveRequestAPIView(LoginRequiredMixin, ListView, UpdateAPIView):
+class LeaveRequestAPIView(ListView, UpdateAPIView):
     model = Leave
     template_name = 'staff-leaves.html'
     context_object_name = 'leave_requests'
