@@ -1,0 +1,125 @@
+<meta name="csrf-token" content="{{ csrf_token }}">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<!-- DataTables CSS -->
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+
+{% include 'headers.html' %}
+<center>
+    <div class="content">
+        {% block content %}
+        <div class="container mt-4">
+            {% if user.is_manager %}
+            <h2>Staff's Leave Requests </h2>
+            {% else %}
+            <h2>My Leave Requests </h2>
+            {% endif %}
+            <table id="leaveRequestsTable" class="table table-striped">
+                <thead>
+                <tr>
+                    {% if user.is_manager %}
+                    <th>Employee</th>
+                    {% endif %}
+                    <th>Leave Start Date</th>
+                    <th>Leave End Date</th>
+                    <th>Status</th>
+                    <th>Leave Request Created Date</th>
+                    <th>Description</th>
+                    <th>Remaining Annual Leave Days </th>
+                    {% if user.is_manager %}
+                    <th>Actions</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for leave in leave_requests %}
+                <tr>
+                    {% if user.is_manager %}
+                    <td>{{ leave.employee }}</td>
+                    {% endif %}
+                    <td>{{ leave.start_date }}</td>
+                    <td>{{ leave.end_date }}</td>
+                    <td>{{ leave.status }}</td>
+                    <td>{{ leave.created_at|date:"d/m/Y" }}</td>
+                    <td>{{ leave.description }}</td>
+                    <td>{{ leave.employee.remaining_annual_leave_days }}</td>
+                    {% if user.is_manager%}
+                    <td>
+                        {% if leave.status == "pending" %}
+                        {% csrf_token %}
+                        <button class="btn btn-success btn-approve"
+                                data-id="{{ leave.id }}">Confirm
+                        </button>
+                        <button class="btn btn-danger btn-reject"
+                                data-id="{{ leave.id }}">Reject
+                        </button>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endblock %}
+    </div>
+</center>
+
+<script>
+    $(document).ready(function() {
+        $('#leaveRequestsTable').DataTable({
+            // DataTable settings
+            "paging": true,           // Pagination
+            "searching": false,        // Search Bar
+            "ordering": true,         // Ordering
+            "info": true,             // Information
+        });
+    });
+
+    $(document).ready(function () {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    $('.btn-approve').click(function () {
+        const leaveId = $(this).data('id');
+        updateLeaveStatus(leaveId, 'approved');
+    });
+
+    $('.btn-reject').click(function () {
+        const leaveId = $(this).data('id');
+        updateLeaveStatus(leaveId, 'rejected');
+    });
+
+    function updateLeaveStatus(leaveId, action) {
+        $.ajax({
+            url: '/staff-leaves/' + leaveId + '/update-status/',
+            type: 'PATCH',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            data: {
+                'leave_id': leaveId,
+                'action': action
+            },
+            success: function (response) {
+                location.reload(); // Refreshes the page
+            },
+            error: function (xhr, status, error) {
+                alert('An error occurred: ' + error);
+            }
+        });
+    }
+});
+
+
+</script>

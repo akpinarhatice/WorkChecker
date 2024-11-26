@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: workchecker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - db_network
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+  djangoapp:
+    build:
+        context: .
+        dockerfile: ./Dockerfile
+    ports:
+      - "8000:8000"
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - db_network
+    command: bash -c "python manage.py runserver 0.0.0.0:8000 --settings=WorkChecker.settings"
+
+networks:
+  db_network:
+    driver: bridge
+
+volumes:
+  db_volume:

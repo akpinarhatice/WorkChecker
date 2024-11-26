@@ -6,8 +6,18 @@
 </head>
 <body>
 <center>
-    <h1>Welcome to the Dashboard</h1>
-    <a href="/logout">Logout</a>
+    {% include 'headers.html' %}
+
+    <div class="content">
+        {% if request.user.is_authenticated %}
+        <h1>Welcome to the Dashboard</h1>
+        <h3>Hi Dear {{ request.user.username }}</h3>
+        {% else %}
+        <h1>You must be authenticated.</h1>
+        {% endif %}
+    </div>
+
+
 </center>
 </body>
 </html>

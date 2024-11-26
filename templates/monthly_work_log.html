@@ -1,0 +1,67 @@
+{% include 'headers.html' %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<!-- DataTables CSS -->
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<center>
+    <div class="content">
+        {% block content %}
+        <div class="container mt-4">
+            <h2>{{month}}.{{year}} Monthly Report</h2>
+            <table id="monthlyReport" class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Total Working Duration</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for record in object_list %}
+                <tr>
+                    <td>{{ record.employee__username }}</td>
+                    <td>
+                        {% if record.total_duration %}
+                        {{ record.total_duration }}
+                        {% else %}
+                        00:00:00
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2">Bu ay için kayıt bulunamadı.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endblock %}
+
+    </div>
+</center>
+
+<script>
+
+    $(document).ready(function() {
+        $('#monthlyReport').DataTable({
+            // DataTable settings
+            "paging": true,           // Pagination
+            "searching": false,        // Search Bar
+            "ordering": true,         // Ordering
+            "info": true,             // Information
+
+        });
+    });
+
+
+</script>

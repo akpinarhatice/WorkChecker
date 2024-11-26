@@ -19,7 +19,7 @@ class BaseLeaveRequestForm(forms.ModelForm):
 
         if start_date and end_date and start_date > end_date:
             raise forms.ValidationError(
-                "Başlangıç tarihi, bitiş tarihinden büyük olamaz.")
+                "The start date cannot be greater than the end date.")
 
         return cleaned_data
 

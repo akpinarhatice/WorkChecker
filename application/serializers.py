@@ -30,8 +30,8 @@ class LoginSerializer(serializers.Serializer):
 
 
 class WorkLogSerializer(serializers.ModelSerializer):
-    employee_username = serializers.CharField(source='employee.username', read_only=True)  # Çalışanın kullanıcı adı
-    late_minutes = serializers.SerializerMethodField()  # Geç kalma süresini hesaplamak için
+    employee_username = serializers.CharField(source='employee.username', read_only=True)
+    late_minutes = serializers.SerializerMethodField()  # to calculate late minutes
 
     class Meta:
         model = WorkLog

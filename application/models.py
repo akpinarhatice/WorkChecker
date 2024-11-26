@@ -26,6 +26,10 @@ class Employee(AbstractUser):
     def is_manager(self):
         return self.role == 'manager'
 
+    @property
+    def remaining_annual_leave_days(self):
+        return self.annual_leave_days - self.used_leave_days
+
 
 class WorkLog(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,

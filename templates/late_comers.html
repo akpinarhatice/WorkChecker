@@ -1,0 +1,70 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<!-- DataTables CSS -->
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+{% include 'headers.html' %}
+<center>
+    <div class="content">
+        {% block content %}
+        <div class="container mt-4">
+            <h2>Late Comers</h2>
+            <p>Excepted Check-In Time: <strong>{{ expected_check_in_time }}</strong></p>
+            <table id="lateComers" class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Check-In Time</th>
+                    <th>Late Time</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for record in late_comers %}
+                <tr>
+                    <td>{{ record.employee.username }}</td>
+                    <td>{{ record.check_in|date:"H:i:s" }}</td>
+
+                    {% if record.late_by %}
+                    <td>{{ record.late_by }}</td>
+                    {% else %}
+                    <td> -</td>
+                    {% endif %}
+
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">There is no late comers.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endblock %}
+    </div>
+</center>
+
+
+<script>
+
+    $(document).ready(function() {
+        $('#lateComers').DataTable({
+            // DataTable settings
+            "paging": true,           // Pagination
+            "searching": false,        // Search Bar
+            "ordering": true,         // Ordering
+            "info": true,             // Information
+
+        });
+    });
+
+
+</script>
