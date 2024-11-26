@@ -1,20 +1,25 @@
-FROM python:3.11.7
-ENV PYTHONUNBUFFERED 1
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
+# Python 3.9-slim imajını kullan
+FROM python:3.9-slim
 
-RUN apt-get update && apt-get install -y postgresql-client
+# Gerekli sistem bağımlılıklarını yükle
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
+# Çalışma dizinini oluştur
+WORKDIR /app
 
-RUN mkdir /code
-WORKDIR /code
+# Gereksinimleri kopyala ve kur
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /code/
+# Uygulama dosyalarını kopyala
+COPY . /app/
 
-RUN pip install --upgrade pip &&  pip install --no-cache-dir -r requirements.txt
-
+# Port 8000'i aç
 EXPOSE 8000
 
-COPY entrypoint.sh /code/entrypoint.sh
-RUN chmod +x /code/entrypoint.sh
-ENTRYPOINT ["/code/entrypoint.sh"]
+# Django server'ı çalıştır
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

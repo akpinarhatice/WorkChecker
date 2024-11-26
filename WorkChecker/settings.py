@@ -82,8 +82,8 @@ DATABASES = {
         "NAME": "workchecker",
         "USER": "postgres",
         "PASSWORD": "postgres",
-        "HOST": "c72499ae8588",
-        "PORT": "5433",
+        "HOST": "db",
+        "PORT": "5432",
     }
 }
 

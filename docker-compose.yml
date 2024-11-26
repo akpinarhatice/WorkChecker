@@ -3,31 +3,39 @@ version: '3'
 services:
   db:
     image: postgres:latest
-    restart: always
     environment:
       POSTGRES_DB: workchecker
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    networks:
-      - db_network
     volumes:
-      - db_volume:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    ports:
+      - "5432:5432"  # PostgreSQL container'ı 5432 portunu dış dünyaya açıyor
+
   djangoapp:
+    restart: always
     build:
-        context: .
-        dockerfile: ./Dockerfile
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    restart: always
     depends_on:
-      - db
+      - db  # Django app, db servisine bağımlı
     networks:
-      - db_network
-    command: bash -c "python manage.py runserver 0.0.0.0:8000 --settings=WorkChecker.settings"
+      - app_network
+    environment:
+      - DB_HOST=db  # db servisi, PostgreSQL container'ı
+      - DB_PORT=5432  # PostgreSQL'in varsayılan portu 5432
+      - DB_NAME=workchecker
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
 
 networks:
-  db_network:
+  app_network:
     driver: bridge
 
 volumes:
-  db_volume:
+  postgres_data:
